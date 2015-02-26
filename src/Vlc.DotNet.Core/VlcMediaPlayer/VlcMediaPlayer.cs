@@ -12,24 +12,27 @@ namespace Vlc.DotNet.Core
     public sealed partial class VlcMediaPlayer : IDisposable
     {
         private VlcMediaPlayerInstance myMediaPlayerInstance;
+        private string[] globalOptions;
 
-        public VlcMediaPlayer(DirectoryInfo vlcLibDirectory)
-            : this(VlcManager.GetInstance(vlcLibDirectory))
+        public VlcMediaPlayer(DirectoryInfo vlcLibDirectory, IEnumerable<string> globalOptions)
+            : this(VlcManager.GetInstance(vlcLibDirectory), globalOptions)
         {
         }
 
-        internal VlcMediaPlayer(VlcManager manager)
+        internal VlcMediaPlayer(VlcManager manager, IEnumerable<string> globalOptions)
         {
             Manager = manager;
+
+            List<string> optsList = new List<string>();
+
 #if DEBUG
-            Manager.CreateNewInstance(new[]
-            {
-                "--extraintf=logger",
-                "--verbose=2"
-            });
-#else
-            Manager.CreateNewInstance(null);
+            optsList.Add("--extraintf=logger");
+            optsList.Add("--verbose=2");
 #endif
+            optsList.AddRange(globalOptions);
+
+            Manager.CreateNewInstance(optsList.ToArray());
+
             myMediaPlayerInstance = manager.CreateMediaPlayer();
             RegisterEvents();
             Chapters = new ChapterManagement(manager, myMediaPlayerInstance);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing.Design;
 using System.IO;
@@ -12,6 +13,8 @@ namespace Vlc.DotNet.Forms
     public partial class VlcControl : Control, ISupportInitialize
     {
         private VlcMediaPlayer myVlcMediaPlayer;
+
+        private List<string> globalOptions = new List<string>();
 
         [Editor(typeof(DirectoryEditor), typeof(UITypeEditor))]
         public DirectoryInfo VlcLibDirectory { get; set; }
@@ -27,6 +30,11 @@ namespace Vlc.DotNet.Forms
         {
         }
 
+        public void AddGlobalOption(string option)
+        {
+            globalOptions.Add(option);
+        }
+
         public void EndInit()
         {
             if (DesignMode || myVlcMediaPlayer != null)
@@ -35,7 +43,7 @@ namespace Vlc.DotNet.Forms
             {
                 throw new Exception("'VlcLibDirectory' must be set.");
             }
-            myVlcMediaPlayer = new VlcMediaPlayer(VlcLibDirectory);
+            myVlcMediaPlayer = new VlcMediaPlayer(VlcLibDirectory, globalOptions);
             myVlcMediaPlayer.VideoHostControlHandle = Handle;
             RegisterEvents();
         }
